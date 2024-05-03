@@ -2,8 +2,9 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const Book = require('./models/books');
+const API_KEY = require('./.env');
 
-mongoose.connect('mongodb+srv://julesvrte:Jules2208@cluster0.8ore6q6.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
+mongoose.connect(API_KEY,
   { useNewUrlParser: true,
     useUnifiedTopology: true })
   .then(() => console.log('Connexion à MongoDB réussie !'))

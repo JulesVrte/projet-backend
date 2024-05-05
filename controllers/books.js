@@ -8,7 +8,7 @@ async function createBooks(req, res, next) {
         await book.save();
         res.status(201).json({ message: 'Objet enregistré !'});
     } catch (error) {
-        res.status(400).json({ error });
+        throw res.status(400).json({ error });
     }
 }
 
@@ -17,7 +17,7 @@ async function modifyBooks(req, res, next) {
         await Book.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id });
         res.status(200).json({ message: 'Objet modifié !'});
     } catch (error) {
-        res.status(400).json({ error });
+        throw res.status(400).json({ error });
     }
 }
 
@@ -26,7 +26,7 @@ async function deleteBooks(req, res, next) {
         await Book.deleteOne({ _id: req.params.id });
         res.status(200).json({ message: 'Objet supprimé !'});
     } catch (error) {
-        res.status(400).json({ error });
+        throw res.status(400).json({ error });
     }
 }
 
@@ -35,7 +35,7 @@ async function getOneBook(req, res, next) {
         const book = await Book.findOne({ _id: req.params.id });
         res.status(200).json(book);
     } catch (error) {
-        res.status(404).json({ error });
+        throw res.status(404).json({ error });
     }
 }
 
@@ -44,7 +44,7 @@ async function getAllBooks(req, res, next) {
         const books = await Book.find();
         res.status(200).json(books);
     } catch (error) {
-        res.status(400).json({ error });
+        throw res.status(400).json({ error });
     }
 }
 

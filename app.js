@@ -3,12 +3,13 @@ const app = express();
 const mongoose = require('mongoose');
 const API_KEY = require('./.env');
 const bookRoutes = require('./routes/books');
+const userRoutes = require('./routes/users');
 
-async function connectToDataBase () {
+function connectToDataBase () {
     try {
-        await mongoose.connect(API_KEY, {useNewUrlParser: true, useUnifiedTopology: true })
+        mongoose.connect(API_KEY, {useNewUrlParser: true, useUnifiedTopology: true })
         console.log('Connexion à MongoDB réussie !')
-    }   catch {
+    } catch {
         console.log('Connexion à MongoDB échouée !')
     }
 }
@@ -25,5 +26,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/books', bookRoutes);
+
+app.use('/api/auth', userRoutes);
 
 module.exports = app;

@@ -24,23 +24,18 @@ async function login(req, res) {
         if (!user) {
             return res.status(401).json({ error: 'Identifiant ou mot de passe incorrect !'});
         } else {
-            try {
-                const valid = await bcrypt.compare(req.body.password, user.password);
-                if (!valid) {
-                    return res.status(401).json({ error: 'Identifiant ou mot de passe incorrect !'});
-                } else {
-                    console.log('salut je passe ici')
-                    res.status(200).json({
-                        userId: user._id,
-                        token: jwt.sign(
-                            { userId: user._id },
-                            'RANDOM_TOKEN_SECRET',
-                            { expiresIn: '24h' }
-                        )
-                    });
-                }
-            } catch(error) {
-                throw res.status(500).json({ error });
+            const valid = await bcrypt.compare(req.body.password, user.password);
+            if (!valid) {
+                return res.status(401).json({ error: 'Identifiant ou mot de passe incorrect !'});
+            } else {
+                res.status(200).json({
+                    userId: user._id,
+                    token: jwt.sign(
+                        { userId: user._id },
+                        'RANDOM_TOKEN_SECRET',
+                        { expiresIn: '24h' }
+                    )
+                });
             }
         }
     } catch(error) {

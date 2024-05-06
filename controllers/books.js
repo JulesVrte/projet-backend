@@ -1,21 +1,36 @@
 const Book = require('../models/books');
+const fs = require('fs');
 
 async function createBooks(req, res, next) {
     try {
+        const bookObject = JSON.parse(req.body.book);
+        delete bookObject.userId;
         const book = new Book({
-            ...req.body
-        });
+            ...bookObject,
+            userId: req.auth.userId,
+            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+        }); 
         await book.save();
         res.status(201).json({ message: 'Objet enregistré !'});
     } catch (error) {
-        throw res.status(400).json({ error });
+        res.status(400).json({ error });
     }
 }
 
 async function modifyBooks(req, res, next) {
     try {
-        await Book.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id });
-        res.status(200).json({ message: 'Objet modifié !'});
+        const bookObject = req.file ? {
+            ...JSON.parse(req.body.book),
+            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+        } : { ...req.body };
+        delete bookObject.userId;
+        const book = await Book.findOne({ _id: req.params.id })
+        if (book.userId !== req.auth.userId) {
+            console.log(res.status(401).json('Vous n\'êtes pas autorisé à effectuer cette action'))
+        } else {
+            await Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id });
+            res.status(200).json({ message: 'Objet modifié !'});
+        }
     } catch (error) {
         throw res.status(400).json({ error });
     }
@@ -23,8 +38,20 @@ async function modifyBooks(req, res, next) {
 
 async function deleteBooks(req, res, next) {
     try {
-        await Book.deleteOne({ _id: req.params.id });
-        res.status(200).json({ message: 'Objet supprimé !'});
+        const book = await Book.findOne({ _id: req.params.id });
+        if (book.userId !== req.auth.userId) {
+            console.log(res.status(401).json('Vous n\'êtes pas autorisé à effectuer cette action'))
+        } else {
+            const filename = book.imageUrl.split('/images/')[1];
+            fs.unlink(`images/${filename}`, async () => {
+                try {
+                    await Book.deleteOne({ _id: req.params.id });
+                    res.status(200).json({ message: 'Objet supprimé !'});
+                } catch (error) {
+                    throw res.status(400).json({ error });
+                }
+            });
+        }
     } catch (error) {
         throw res.status(400).json({ error });
     }

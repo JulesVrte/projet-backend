@@ -32,7 +32,7 @@ async function modifyBooks(req, res, next) {
             res.status(200).json({ message: 'Objet modifié !'});
         }
     } catch (error) {
-         res.status(400).json({ error });
+         res.status(403).json('Vous n\'êtes pas autorisé à effectuer cette action');
     }
 }
 
@@ -53,7 +53,7 @@ async function deleteBooks(req, res, next) {
             });
         }
     } catch (error) {
-         res.status(401).json('Vous n\'êtes pas autorisé à effectuer cette action')
+         res.status(403).json('Vous n\'êtes pas autorisé à effectuer cette action')
     }
 }
 

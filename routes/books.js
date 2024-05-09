@@ -4,11 +4,11 @@ const auth = require('../middleware/auth');
 const multer = require('../middleware/multer-config');
 const router = express.Router();
 
-router.get('/:id', bookControllers.getOneBook);
-
 router.get('/', bookControllers.getAllBooks);
 
 router.get('/bestrating', bookControllers.getBestRatedBooks);
+
+router.get('/:id', bookControllers.getOneBook);
 
 router.post('/', auth, multer, bookControllers.createBooks);
 

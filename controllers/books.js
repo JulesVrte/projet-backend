@@ -75,6 +75,16 @@ async function getAllBooks(req, res, next) {
     }
 }
 
+async function getBestRatedBooks(req, res, next) {
+    try {
+        const books = await Book.find();
+        console.log(books)
+        res.status(200).json(books);
+    } catch (error) {
+        res.status(400).json({ error });
+    }
+}
+
 async function rateBook(req, res, next) {
     try {
         const book = await Book.findOne({ _id: req.params.id });
@@ -93,16 +103,6 @@ async function rateBook(req, res, next) {
         await Book.updateOne({ _id: req.params.id }, { ratings, averageRating, _id: req.params.id });
         const newBook = await Book.findOne({ _id: req.params.id });
         res.status(200).json(newBook);
-    } catch (error) {
-         res.status(400).json({ error });
-    }
-}
-
-async function getBestRatedBooks(req, res, next) {
-    try {
-        const books = await Book.find()
-        console.log(books)
-        res.status(200).json(books);
     } catch (error) {
          res.status(400).json({ error });
     }

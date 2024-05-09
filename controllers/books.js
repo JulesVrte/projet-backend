@@ -26,13 +26,13 @@ async function modifyBooks(req, res, next) {
         delete bookObject.userId;
         const book = await Book.findOne({ _id: req.params.id })
         if (book.userId !== req.auth.userId) {
-            console.log(res.status(401).json('Vous n\'êtes pas autorisé à effectuer cette action'))
+            error({message: 'Vous n\'êtes pas autorisé à effectuer cette action'})
         } else {
             await Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id });
             res.status(200).json({ message: 'Objet modifié !'});
         }
     } catch (error) {
-        throw res.status(400).json({ error });
+         res.status(400).json({ error });
     }
 }
 
@@ -40,7 +40,7 @@ async function deleteBooks(req, res, next) {
     try {
         const book = await Book.findOne({ _id: req.params.id });
         if (book.userId !== req.auth.userId) {
-            console.log(res.status(401).json('Vous n\'êtes pas autorisé à effectuer cette action'))
+            return
         } else {
             const filename = book.imageUrl.split('/images/')[1];
             fs.unlink(`images/${filename}`, async () => {
@@ -48,12 +48,12 @@ async function deleteBooks(req, res, next) {
                     await Book.deleteOne({ _id: req.params.id });
                     res.status(200).json({ message: 'Objet supprimé !'});
                 } catch (error) {
-                    throw res.status(400).json({ error });
+                     res.status(400).json({ error });
                 }
             });
         }
     } catch (error) {
-        throw res.status(400).json({ error });
+         res.status(401).json('Vous n\'êtes pas autorisé à effectuer cette action')
     }
 }
 
@@ -62,7 +62,7 @@ async function getOneBook(req, res, next) {
         const book = await Book.findOne({ _id: req.params.id });
         res.status(200).json(book);
     } catch (error) {
-        throw res.status(404).json({ error });
+         res.status(404).json({ error });
     }
 }
 
@@ -71,7 +71,40 @@ async function getAllBooks(req, res, next) {
         const books = await Book.find();
         res.status(200).json(books);
     } catch (error) {
-        throw res.status(400).json({ error });
+         res.status(400).json({ error });
+    }
+}
+
+async function rateBook(req, res, next) {
+    try {
+        const book = await Book.findOne({ _id: req.params.id });
+        let ratingsObject = {...req.body};
+        const grade = ratingsObject.rating
+        delete ratingsObject.userId
+        ratingsObject.userId = req.auth.userId
+        delete ratingsObject.rating
+        ratingsObject.grade = grade
+        if (book.ratings.some(rating => rating.userId === req.auth.userId)) {
+            error({ message: 'Vous avez déjà noté ce livre.' })
+        }
+        let ratings = book.ratings
+        ratings.push({...ratingsObject})
+        const averageRating = ratings.reduce((acc, curr) => acc + curr.grade, 0) / ratings.length
+        await Book.updateOne({ _id: req.params.id }, { ratings, averageRating, _id: req.params.id });
+        const newBook = await Book.findOne({ _id: req.params.id });
+        res.status(200).json(newBook);
+    } catch (error) {
+         res.status(400).json({ error });
+    }
+}
+
+async function getBestRatedBooks(req, res, next) {
+    try {
+        const books = await Book.find()
+        console.log(books)
+        res.status(200).json(books);
+    } catch (error) {
+         res.status(400).json({ error });
     }
 }
 
@@ -80,3 +113,5 @@ exports.modifyBooks = modifyBooks;
 exports.deleteBooks = deleteBooks;
 exports.getOneBook = getOneBook;
 exports.getAllBooks = getAllBooks;
+exports.rateBook = rateBook;
+exports.getBestRatedBooks = getBestRatedBooks;

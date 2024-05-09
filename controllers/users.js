@@ -14,7 +14,7 @@ async function signUp(req, res) {
         res.status(201).json({ message: 'Utilisateur créé !'})
 
     } catch(error) {
-        throw res.status(400).json({ error });
+         res.status(400).json({ error });
     }
 }
 
@@ -22,11 +22,11 @@ async function login(req, res) {
     try {
         const user = await User.findOne({ email: req.body.email });
         if (!user) {
-            return res.status(401).json({ error: 'Identifiant ou mot de passe incorrect !'});
+            return
         } else {
             const valid = await bcrypt.compare(req.body.password, user.password);
             if (!valid) {
-                return res.status(401).json({ error: 'Identifiant ou mot de passe incorrect !'});
+                return
             } else {
                 res.status(200).json({
                     userId: user._id,
@@ -39,7 +39,8 @@ async function login(req, res) {
             }
         }
     } catch(error) {
-        throw res.status(500).json({ error });
+         res.status(401).json({ error: 'Identifiant ou mot de passe incorrect !'});
+
     }
 }
 

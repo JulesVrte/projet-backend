@@ -20,7 +20,7 @@ app.set('port', port);
 const errorHandler = error => {
   if (error.syscall !== 'listen') {
 
-    throw error;
+     error;
   }
   
   const address = server.address();
@@ -37,7 +37,7 @@ const errorHandler = error => {
       process.exit(1);
       break;
     default:
-      throw error;
+       error;
   }
 };
 

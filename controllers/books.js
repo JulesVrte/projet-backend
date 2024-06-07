@@ -1,6 +1,5 @@
 const Book = require('../models/books');
 const fs = require('fs');
-const multer = require('multer');
 const sharp = require('sharp'); 
 
 async function createBooks(req, res, next) {
@@ -43,6 +42,13 @@ async function modifyBooks(req, res, next) {
         if (book.userId !== req.auth.userId) {
             error({message: 'Vous n\'êtes pas autorisé à effectuer cette action'})
         } else {
+            if (req.file) {
+                const ref = req.file.originalname.split(' ').join('_') + Date.now() + '.' + extension
+                const path = `images/${ref}`
+                await sharp(buffer)
+                .webp({ quality: 20 })
+                .toFile(path)
+            }
             await Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id });
             res.status(200).json({ message: 'Objet modifié !'});
         }
@@ -94,7 +100,6 @@ async function getAllBooks(req, res, next) {
 async function getBestRatedBooks(req, res, next) {
     try {
         const books = await Book.find().sort({ averageRating: -1 }).limit(3);
-        console.log(books)
         res.status(200).json(books);
     } catch (error) {
         res.status(400).json({ error });

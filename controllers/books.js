@@ -1,7 +1,5 @@
 const Book = require('../models/books');
 const fs = require('fs');
-const multer = require('multer');
-const sharp = require('sharp'); 
 
 async function createBooks(req, res, next) {
     try {

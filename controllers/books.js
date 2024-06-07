@@ -1,15 +1,10 @@
 const Book = require('../models/books');
 const fs = require('fs');
+const multer = require('multer');
 const sharp = require('sharp'); 
 
 async function createBooks(req, res, next) {
     try {
-        const MIME_TYPES = {
-            'image/jpg': 'jpg',
-            'image/jpeg': 'jpg',
-            'image/png': 'png',
-            'image/wepb': 'wepb'
-        };
         const bookObject = JSON.parse(req.body.book);
         delete bookObject.userId;
         const book = new Book({
@@ -18,14 +13,7 @@ async function createBooks(req, res, next) {
             imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
         }); 
         await book.save();
-        const { buffer } = req.file;
-        const extension = MIME_TYPES[req.file.mimetype];
-        const ref = req.file.originalname.split(' ').join('_') + Date.now() + '.' + extension
-        const path = `images/${ref}`
-        await sharp(buffer)
-        .webp({ quality: 20 })
-        .toFile(path)
-        res.status(201).json({ message: 'Objet enregistré !'});
+        res.status(201).json(book);
     } catch (error) {
         res.status(400).json({ error });
     }
@@ -42,13 +30,6 @@ async function modifyBooks(req, res, next) {
         if (book.userId !== req.auth.userId) {
             error({message: 'Vous n\'êtes pas autorisé à effectuer cette action'})
         } else {
-            if (req.file) {
-                const ref = req.file.originalname.split(' ').join('_') + Date.now() + '.' + extension
-                const path = `images/${ref}`
-                await sharp(buffer)
-                .webp({ quality: 20 })
-                .toFile(path)
-            }
             await Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id });
             res.status(200).json({ message: 'Objet modifié !'});
         }

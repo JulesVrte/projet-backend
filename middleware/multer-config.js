@@ -7,7 +7,7 @@ const MIME_TYPES = {
     'image/wepb': 'wepb'
 };
 
-const storage = multer.memoryStorage({
+const storage = multer.diskStorage({
     destination: (req, file, callback) => {
         callback(null, 'images');
     },
@@ -18,4 +18,4 @@ const storage = multer.memoryStorage({
     }
 });
 
-module.exports = multer({ storage }).single('image');
+module.exports = multer({ storage: storage }).single('image');
